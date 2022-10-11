@@ -4,6 +4,12 @@
 
 #pragma comment(lib, "d3dcompiler.lib")
 
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+using namespace std;
+
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
@@ -388,6 +394,13 @@ void Object3d::LoadTexture()
 
 void Object3d::CreateModel()
 {
+
+	// ファイルストリーム
+	//std::ifstream file;
+	// ファイルを開く
+	//file.open("Resources/triangle/triangle.obj");
+	// ファイルオープン失敗をチェック
+
 	HRESULT result = S_FALSE;
 
 	std::vector<VertexPosNormalUv> realVertices;
