@@ -138,7 +138,7 @@ private: // 静的メンバ変数
 	static D3D12_INDEX_BUFFER_VIEW ibView;
 	// 頂点データ配列
 	/*static VertexPosNormalUv vertices[vertexCount];*/
-	static std::vector<VertexPosNormalUv> vertics;
+	static std::vector<VertexPosNormalUv> vertices;
 	// 頂点インデックス配列
 	/*static unsigned short indices[planeCount * 3];*/
 	static std::vector<unsigned short> indices;
