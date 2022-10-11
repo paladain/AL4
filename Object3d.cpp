@@ -4,8 +4,16 @@
 
 #pragma comment(lib, "d3dcompiler.lib")
 
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+using namespace std;
+
 using namespace DirectX;
 using namespace Microsoft::WRL;
+
+
 
 /// <summary>
 /// 静的メンバ変数の実体
@@ -30,8 +38,10 @@ XMFLOAT3 Object3d::target = { 0, 0, 0 };
 XMFLOAT3 Object3d::up = { 0, 1, 0 };
 D3D12_VERTEX_BUFFER_VIEW Object3d::vbView{};
 D3D12_INDEX_BUFFER_VIEW Object3d::ibView{};
-Object3d::VertexPosNormalUv Object3d::vertices[vertexCount];
-unsigned short Object3d::indices[planeCount * 3];
+//Object3d::VertexPosNormalUv Object3d::vertices[vertexCount];
+//unsigned short Object3d::indices[planeCount * 3];
+std::vector<Object3d::VertexPosNormalUv> Object3d::vertics;
+std::vector<unsigned short> Object3d::indices;
 
 void Object3d::StaticInitialize(ID3D12Device * device, int window_width, int window_height)
 {
@@ -388,6 +398,32 @@ void Object3d::LoadTexture()
 
 void Object3d::CreateModel()
 {
+
+	// ファイルストリーム
+	std::ifstream file;
+	// .objファイルを開く
+	file.open("Resources/triangle/triangle.obj");
+	// ファイルオープン失敗をチェック
+	if (file.fail()) {
+		assert(0);
+	}
+
+	vector<XMFLOAT3> positions;
+	vector<XMFLOAT3> normals;
+	vector<XMFLOAT2> texcoords;
+	// 1行ずつ読み込む
+	string line;
+	while (getline(file, line)) {
+		// 1行分の文字列をストリームに変換して解析しやすくする
+		std::istringstream line_stream(line);
+
+		// 半角スペース区切りで行の先頭文字列を取得
+		string key;
+		getline(line_stream, key, ' ');
+	}
+	// ファイルを閉じる
+	file.close();
+
 	HRESULT result = S_FALSE;
 
 	std::vector<VertexPosNormalUv> realVertices;
