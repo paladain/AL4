@@ -30,32 +30,41 @@ public: // サブクラス
 		XMFLOAT2 uv;  // uv座標
 	};
 
-	// 定数バッファ用データ構造体
-	struct ConstBufferData
+	// 定数バッファ用データ構造体B0
+	struct ConstBufferDataB0
 	{
 		XMFLOAT4 color;	// 色 (RGBA)
 		XMMATRIX mat;	// ３Ｄ変換行列
 	};
 
-	// 02_02_途中
+	// 定数バッファ用データ構造体B1
+	struct ConstBufferDataB1 {
+		XMFLOAT3 ambient; // アンビエント係数
+		float pad1;
+		XMFLOAT3 diffuse; // ディフューズ係数
+		float pad2;
+		XMFLOAT3 specular; // スペキュラー係数
+		float alpha;
+	};
 
-	//// マテリアル
-	//struct Material {
+	// 02_02
+	// マテリアル
+	struct Material {
 
-	//	std::string name; // マテリアル名
-	//	XMFLOAT3 ambient; // アンビエント影響度
-	//	XMFLOAT3 diffuse; // ディフューズ影響度
-	//	XMFLOAT3 specular; // スペキュラー影響度
-	//	float alpha; // アルファ
-	//	std::string textureFilename; // テクスチャファイル名
-	//	// コンストラクタ
-	//	Material() {
-	//		ambient = { 0.3f, 0.3f, 0.3f };
-	//		diffuse = { 0.0f, 0.0f, 0.0f };
-	//		specular = { 0.0f, 0.0f, 0.0f };
-	//		alpha = 1.0f;
-	//	}
-	//};
+		std::string name; // マテリアル名
+		XMFLOAT3 ambient; // アンビエント影響度
+		XMFLOAT3 diffuse; // ディフューズ影響度
+		XMFLOAT3 specular; // スペキュラー影響度
+		float alpha; // アルファ
+		std::string textureFilename; // テクスチャファイル名
+		// コンストラクタ
+		Material() {
+			ambient = { 0.3f, 0.3f, 0.3f };
+			diffuse = { 0.0f, 0.0f, 0.0f };
+			specular = { 0.0f, 0.0f, 0.0f };
+			alpha = 1.0f;
+		}
+	};
 
 private: // 定数
 	static const int division = 50;					// 分割数
@@ -163,6 +172,8 @@ private: // 静的メンバ変数
 	// 頂点インデックス配列
 	/*static unsigned short indices[planeCount * 3];*/
 	static std::vector<unsigned short> indices;
+	// マテリアル
+	static Material material;
 
 private:// 静的メンバ関数
 	/// <summary>
@@ -223,7 +234,9 @@ public: // メンバ関数
 	void SetPosition(const XMFLOAT3& position) { this->position = position; }
 
 private: // メンバ変数
-	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
+	//ComPtr<ID3D12Resource> constBuff; // 定数バッファ
+	ComPtr<ID3D12Resource> constBuffB0; // 定数バッファ
+	ComPtr<ID3D12Resource> constBuffB1; // 定数バッファ
 	// 色
 	XMFLOAT4 color = { 1,1,1,1 };
 	// ローカルスケール
