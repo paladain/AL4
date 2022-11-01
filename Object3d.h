@@ -129,6 +129,11 @@ public: // 静的メンバ関数
 	/// <param name="move">移動量</param>
 	static void CameraMoveVector(XMFLOAT3 move);
 
+	/// <summary>
+	/// マテリアル読み込み
+	/// </summary>
+	static void LoadMaterial(const std::string& directoryPath, const std::string& filename);
+
 private: // 静的メンバ変数
 	// デバイス
 	static ID3D12Device* device;
@@ -197,7 +202,8 @@ private:// 静的メンバ関数
 	/// <summary>
 	/// テクスチャ読み込み
 	/// </summary>
-	static void LoadTexture();
+	/// <returns>成否</returns>
+	static void LoadTexture(const std::string& directoryPath, const std::string& filename);
 
 	/// <summary>
 	/// モデル作成

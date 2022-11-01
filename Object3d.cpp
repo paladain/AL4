@@ -145,6 +145,67 @@ void Object3d::CameraMoveVector(XMFLOAT3 move)
 	SetTarget(target_moved);
 }
 
+void Object3d::LoadMaterial(const std::string& directoryPath, const std::string& filename)
+{
+	// 
+	std::ifstream file;
+	// 
+	file.open(directoryPath + filename);
+	// 
+	if (file.fail()) {
+		assert(0);
+	}
+
+	// 1
+	string line;
+	while (getline(file, line)) {
+		// 1
+		std::istringstream line_stream(line);
+
+		// 半角
+		string key;
+		getline(line_stream, key, ' ');
+
+		// 
+		if (key[0] == '\t') {
+			key.erase(key.begin());
+		}
+
+		// 先頭文字がnewmtlならマテリアル名
+		if (key == "newmtl") {
+			//マテリアル名読み込み 
+			line_stream >> material.name;
+		}
+		// 先頭文字がKaならアンビエント色
+		if (key == "Ka") {
+			line_stream >> material.ambient.x;
+			line_stream >> material.ambient.y;
+			line_stream >> material.ambient.z;
+		}
+		// 先頭文字がKdならディフューズ色
+		if (key == "Kd") {
+			line_stream >> material.diffuse.x;
+			line_stream >> material.diffuse.y;
+			line_stream >> material.diffuse.z;
+		}
+		// 先頭文字がKsならスペキュラー色
+		if (key == "Ks") {
+			line_stream >> material.specular.x;
+			line_stream >> material.specular.y;
+			line_stream >> material.specular.z;
+		}
+		// 先頭文字がmap_Kdならテクスチャファイル名
+		if (key == "map_Kd") {
+			// テクスチャのファイル名読み込み
+			line_stream >> material.textureFilename;
+			// テクスチャ読み込み
+			LoadTexture(directoryPath, material.textureFilename);
+		}
+	}
+	// ファイルを閉じる
+	file.close();
+}
+
 void Object3d::InitializeDescriptorHeap()
 {
 	HRESULT result = S_FALSE;
@@ -337,15 +398,23 @@ void Object3d::InitializeGraphicsPipeline()
 
 }
 
-void Object3d::LoadTexture()
+void Object3d::LoadTexture(const std::string& directoryPath, const std::string& filename)
 {
 	HRESULT result = S_FALSE;
 
 	TexMetadata metadata{};
 	ScratchImage scratchImg{};
 
+	// ファイルパスを結合
+	string filepath = directoryPath + filename;
+
+	// ユニコード文字列に変換する
+	wchar_t wfilepath[128];
+	int iBufferSize = MultiByteToWideChar(CP_ACP, 0, filepath.c_str(), -1, wfilepath, _countof(wfilepath));
+
 	// WICテクスチャのロード
-	result = LoadFromWICFile(L"Resources/texture.png", WIC_FLAGS_NONE, &metadata, scratchImg);
+	/*result = LoadFromWICFile(L"Resources/texture.png", WIC_FLAGS_NONE, &metadata, scratchImg);*/
+	result = LoadFromWICFile(wfilepath, WIC_FLAGS_NONE, &metadata, scratchImg);
 	assert(SUCCEEDED(result));
 
 	ScratchImage mipChain{};
@@ -422,23 +491,23 @@ void Object3d::CreateModel()
 	const string directoryPath = "Resourse/" + modelname + "/"; // "Resources/triangle.mat/"
 	file.open(directoryPath + filename); // "Resources/triangle_mat/triangle_mat.obj"
 
-	vector<XMFLOAT3> positions; // 
-	vector<XMFLOAT3> normals;   // 
-	vector<XMFLOAT3> texcoords; // 
-	// 1
+	vector<XMFLOAT3> positions; // 頂点座標
+	vector<XMFLOAT3> normals;   // 法線ベクトル
+	vector<XMFLOAT3> texcoords; // テクスチャUV
+	// 1行ずつ読み込む
 	string line;
 	while (getline(file, line)) {
-		// 1
+		// 1行分の文字列をストリームに変換して解析しやすくする
 		std::istringstream line_stream(line);
-		// 
+		// 半角スペース区切りで行の先頭文字列を取得
 		string key;
 		getline(line_stream, key, ' ');
-		// 
+		// 先頭文字がmtllibならマテリアル
 		if (key == "mtllib") {
-			// 
+			// マテリアルファイル名読み込み
 			string filename;
 			line_stream >> filename;
-			// 
+			// マテリアル読み込み
 			LoadMaterial(directoryPath, filename); // 02_02 ファイル,マテリアル読み込み_途中
 		}
 	}
@@ -729,6 +798,8 @@ bool Object3d::Initialize()
 		D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 		IID_PPV_ARGS(&constBuffB0));
 
+	assert(SUCCEEDED(result));
+
 	// 02_02 定数バッファ生成
 	resourceDesc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB1) + 0xff) & ~0xff);
 
@@ -739,7 +810,7 @@ bool Object3d::Initialize()
 		IID_PPV_ARGS(&constBuffB1));
 	// 02_02 定数バッファ生成
 
-	assert(SUCCEEDED(result));
+	//assert(SUCCEEDED(result));
 
 	return true;
 }
@@ -783,7 +854,7 @@ void Object3d::Update()
 	constMap1->diffuse = material.diffuse;
 	constMap1->specular = material.specular;
 	constMap1->alpha = material.alpha;
-	constBuffB0->Unmap(0, nullptr);
+	constBuffB1->Unmap(0, nullptr);
 }
 
 void Object3d::Draw()
